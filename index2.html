@@ -9,6 +9,8 @@
         #posts { margin-top: 20px; }
         .post { border: 1px solid #ccc; padding: 10px; margin: 10px 0; }
     </style>
+    <script src="https://www.gstatic.com/firebasejs/9.1.2/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.1.2/firebase-firestore.js"></script>
 </head>
 <body>
     <h1>Movie/Show Journal</h1>
@@ -21,11 +23,27 @@
     <div id="posts"></div>
 
     <script>
-        // Load posts from local storage
+        // Your web app's Firebase configuration
+        const firebaseConfig = {
+            apiKey: "YOUR_API_KEY",
+            authDomain: "YOUR_PROJECT_ID.firebaseapp.com",
+            projectId: "YOUR_PROJECT_ID",
+            storageBucket: "YOUR_PROJECT_ID.appspot.com",
+            messagingSenderId: "YOUR_SENDER_ID",
+            appId: "YOUR_APP_ID"
+        };
+
+        // Initialize Firebase
+        const app = firebase.initializeApp(firebaseConfig);
+        const db = firebase.firestore();
+
+        // Load posts from Firestore
         function loadPosts() {
-            const posts = JSON.parse(localStorage.getItem('posts')) || [];
-            posts.forEach(post => {
-                displayPost(post.title, post.review);
+            db.collection("posts").get().then((querySnapshot) => {
+                querySnapshot.forEach((doc) => {
+                    const post = doc.data();
+                    displayPost(post.title, post.review);
+                });
             });
         }
 
@@ -37,13 +55,6 @@
             document.getElementById('posts').appendChild(postDiv);
         }
 
-        // Save posts to local storage
-        function savePost(title, review) {
-            const posts = JSON.parse(localStorage.getItem('posts')) || [];
-            posts.push({ title, review });
-            localStorage.setItem('posts', JSON.stringify(posts));
-        }
-
         // Handle form submission
         document.getElementById('postForm').addEventListener('submit', function(event) {
             event.preventDefault();
@@ -51,11 +62,14 @@
             const title = document.getElementById('title').value;
             const review = document.getElementById('review').value;
 
-            displayPost(title, review);
-            savePost(title, review);
-
-            // Clear the form
-            document.getElementById('postForm').reset();
+            // Save post to Firestore
+            db.collection("posts").add({
+                title: title,
+                review: review
+            }).then(() => {
+                displayPost(title, review);
+                document.getElementById('postForm').reset();
+            });
         });
 
         // Load posts on page load
