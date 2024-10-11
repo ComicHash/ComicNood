@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Movie/Show Journal</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; }
+        #posts { margin-top: 20px; }
+        .post { border: 1px solid #ccc; padding: 10px; margin: 10px 0; }
+    </style>
+    <script src="https://www.gstatic.com/firebasejs/9.1.2/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.1.2/firebase-firestore.js"></script>
+</head>
+<body>
+    <h1>Movie/Show Journal</h1>
+    <form id="postForm">
+        <input type="text" id="title" placeholder="Title" required>
+        <textarea id="review" placeholder="Your review..." required></textarea>
+        <button type="submit">Post</button>
+    </form>
+    
+    <div id="posts"></div>
+
+    <script>
+        // Your web app's Firebase configuration
+const firebaseConfig = {
+    apiKey: "AIzaSyBGheVhm19OEl5j2jOm8iqQR8eEhg7P3OM",
+    authDomain: "comicnood-80d59.firebaseapp.com",
+    databaseURL: "https://comicnood-80d59-default-rtdb.firebaseio.com",
+    projectId: "comicnood-80d59",
+    storageBucket: "comicnood-80d59.appspot.com",
+    messagingSenderId: "826016872497",
+    appId: "1:826016872497:web:3e9e0d4b63468fe4d83d10",
+    measurementId: "G-MLC6WF8CZW"
+  };
+        // Initialize Firebase
+        const app = firebase.initializeApp(firebaseConfig);
+        const db = firebase.firestore();
+
+        // Load posts from Firestore
+        function loadPosts() {
+            db.collection("posts").get().then((querySnapshot) => {
+                querySnapshot.forEach((doc) => {
+                    const post = doc.data();
+                    displayPost(post.title, post.review);
+                });
+            });
+        }
+
+        // Display a post
+        function displayPost(title, review) {
+            const postDiv = document.createElement('div');
+            postDiv.className = 'post';
+            postDiv.innerHTML = `<h2>${title}</h2><p>${review}</p>`;
+            document.getElementById('posts').appendChild(postDiv);
+        }
+
+        // Handle form submission
+        document.getElementById('postForm').addEventListener('submit', function(event) {
+            event.preventDefault();
+            
+            const title = document.getElementById('title').value;
+            const review = document.getElementById('review').value;
+
+            // Save post to Firestore
+            db.collection("posts").add({
+                title: title,
+                review: review
+            }).then(() => {
+                displayPost(title, review);
+                document.getElementById('postForm').reset();
+            });
+        });
+
+        // Load posts on page load
+        loadPosts();
+    </script>
+</body>
+</html>
