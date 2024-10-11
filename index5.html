@@ -33,20 +33,33 @@ const firebaseConfig = {
     messagingSenderId: "826016872497",
     appId: "1:826016872497:web:3e9e0d4b63468fe4d83d10",
     measurementId: "G-MLC6WF8CZW"
-  };
-        // Initialize Firebase
-        const app = firebase.initializeApp(firebaseConfig);
-        const db = firebase.firestore();
+  };// Firebase initialization code
+firebase.initializeApp(firebaseConfig);
+const db = firebase.firestore();
 
-        // Load posts from Firestore
-        function loadPosts() {
-            db.collection("posts").get().then((querySnapshot) => {
-                querySnapshot.forEach((doc) => {
-                    const post = doc.data();
-                    displayPost(post.title, post.review);
-                });
-            });
-        }
+// Load posts function
+function loadPosts() {
+    db.collection("posts").get().then((querySnapshot) => {
+        querySnapshot.forEach((doc) => {
+            const post = doc.data();
+            displayPost(post.title, post.review);
+        });
+    }).catch((error) => {
+        console.error("Error getting documents: ", error);
+    });
+}
+
+// Display post function
+function displayPost(title, review) {
+    const postDiv = document.createElement('div');
+    postDiv.className = 'post';
+    postDiv.innerHTML = `<h2>${title}</h2><p>${review}</p>`;
+    document.getElementById('posts').appendChild(postDiv);
+}
+
+// Call loadPosts on page load
+loadPosts();
+
 
         // Display a post
         function displayPost(title, review) {
